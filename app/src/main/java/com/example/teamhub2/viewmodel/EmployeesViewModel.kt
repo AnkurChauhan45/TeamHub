@@ -18,8 +18,9 @@ class EmployeesViewModel @Inject constructor(
     private val networkUtils: NetworkUtils
 ) : ViewModel() {
 
-    // ---------------- SEARCH ----------------
 
+
+    //  SEARCH
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -27,7 +28,7 @@ class EmployeesViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
-    // ---------------- FILTER ----------------
+    //  FILTER
 
     private val _filterState = MutableStateFlow(FilterState())
     val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
@@ -48,7 +49,7 @@ class EmployeesViewModel @Inject constructor(
         _filterState.value = FilterState()
     }
 
-    // ---------------- NETWORK STATE ----------------
+    //  NETWORK STATE
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -56,11 +57,12 @@ class EmployeesViewModel @Inject constructor(
     private val _isOffline = MutableStateFlow(false)
     val isOffline: StateFlow<Boolean> = _isOffline.asStateFlow()
 
-    // ---------------- DATA FLOW ----------------
+    //  DATA SOURCE
 
     private val rawEmployeesFlow: Flow<List<EmployeeEntity>> =
         repository.getEmployees()
 
+    //  UI STATE
     val uiState: StateFlow<EmployeesUiState> =
         combine(
             rawEmployeesFlow,
@@ -94,12 +96,34 @@ class EmployeesViewModel @Inject constructor(
                     filter.isActive == null ||
                             it.isActive == filter.isActive
                 }
+                .sortedWith { a, b ->
 
+                    val regex = Regex("""(\D+)\s*(\d+)?""")
+
+                    val aMatch = regex.find(a.name.lowercase())
+                    val bMatch = regex.find(b.name.lowercase())
+
+                    val aText = aMatch?.groupValues?.get(1) ?: ""
+                    val bText = bMatch?.groupValues?.get(1) ?: ""
+
+                    val textCompare = aText.compareTo(bText)
+
+                    if (textCompare != 0) {
+                        textCompare
+                    } else {
+                        val aNum = aMatch?.groupValues?.getOrNull(2)?.toIntOrNull() ?: 0
+                        val bNum = bMatch?.groupValues?.getOrNull(2)?.toIntOrNull() ?: 0
+                        aNum.compareTo(bNum)
+                    }
+                }
+            //  explicitly return EmployeesUiState
             EmployeesUiState.Success(
                 employees = filteredEmployees,
                 departments = departments,
-                designations = designations
+                designations = designations,
+                totalCount = filteredEmployees.size
             ) as EmployeesUiState
+
         }
             .onStart { emit(EmployeesUiState.Loading) }
             .catch { emit(EmployeesUiState.Error("Something went wrong")) }
@@ -109,26 +133,33 @@ class EmployeesViewModel @Inject constructor(
                 EmployeesUiState.Loading
             )
 
-    // ---------------- INIT ----------------
+    //  INIT
 
     init {
         observeNetwork()
         loadInitialEmployees()
     }
 
-    // ---------------- INITIAL LOAD ----------------
+    //  INITIAL LOAD
 
-    private fun loadInitialEmployees() {
-        viewModelScope.launch {
+
+private fun loadInitialEmployees() {
+    viewModelScope.launch {
+        if (!_isOffline.value) {
             repository.refreshEmployees()
         }
     }
+}
 
-    // ---------------- PULL TO REFRESH ----------------
+    //  PULL TO REFRESH
 
     fun refreshEmployees() {
         viewModelScope.launch {
+
+            if (_isRefreshing.value) return@launch
+
             _isRefreshing.value = true
+
             try {
                 repository.refreshEmployees()
             } finally {
@@ -137,15 +168,39 @@ class EmployeesViewModel @Inject constructor(
         }
     }
 
-    // ---------------- NETWORK OBSERVER (REACTIVE) ----------------
+    // NETWORK OBSERVER
 
     private fun observeNetwork() {
         viewModelScope.launch {
+
             networkUtils.observeNetwork()
+                .drop(1) // ignore first emission
                 .distinctUntilChanged()
                 .collect { isConnected ->
+
                     _isOffline.value = !isConnected
+
+                    if (isConnected) {
+                        refreshEmployees()
+                    }
                 }
         }
     }
+
+//    private fun observeNetwork() {
+//        viewModelScope.launch {
+//
+//            networkUtils.observeNetwork()
+//                .distinctUntilChanged()
+//                .collect { isConnected ->
+//
+//                    _isOffline.value = !isConnected
+//
+//                    // Internet available → auto refresh API
+//                    if (isConnected) {
+//                        refreshEmployees()
+//                    }
+//                }
+//        }
+//    }
 }

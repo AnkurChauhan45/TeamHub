@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,160 +17,14 @@ import com.example.teamhub2.ui.state.EmployeesUiState
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-
-
-//
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun EmployeesScreen(
-//    viewModel: EmployeesViewModel = hiltViewModel(),
-//    onEmployeeClick: (String) -> Unit
-//) {
-//
-//    val state by viewModel.uiState.collectAsState()
-//    val isRefreshing by viewModel.isRefreshing.collectAsState()
-//    val isOffline by viewModel.isOffline.collectAsState()
-//    val filterState by viewModel.filterState.collectAsState()
-//    val searchQuery by viewModel.searchQuery.collectAsState()
-//
-//    var showFilterSheet by remember { mutableStateOf(false) }
-//
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = { Text("Employees") },
-//                actions = {
-//
-//                    // 🔄 Manual Refresh Button
-//                    IconButton(onClick = { viewModel.refreshEmployees() }) {
-//                        Icon(
-//                            imageVector = Icons.Default.Refresh,
-//                            contentDescription = "Refresh"
-//                        )
-//                    }
-//
-//                    // 🔍 Filter Button
-//                    IconButton(onClick = { showFilterSheet = true }) {
-//                        Icon(
-//                            imageVector = Icons.Default.FilterList,
-//                            contentDescription = "Filter"
-//                        )
-//                    }
-//                }
-//            )
-//        }
-//    ) { padding ->
-//
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(padding)
-//        ) {
-//
-//            // 🔎 SEARCH FIELD
-//            OutlinedTextField(
-//                value = searchQuery,
-//                onValueChange = viewModel::onSearchChange,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(16.dp),
-//                placeholder = { Text("Search by name") },
-//                singleLine = true
-//            )
-//
-//            // 📡 OFFLINE BANNER
-//            if (isOffline) {
-//                Surface(
-//                    color = MaterialTheme.colorScheme.errorContainer,
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Text(
-//                        text = "You're offline. Showing cached data.",
-//                        modifier = Modifier.padding(12.dp),
-//                        color = MaterialTheme.colorScheme.onErrorContainer
-//                    )
-//                }
-//            }
-//
-//            when (val currentState = state) {
-//
-//                is EmployeesUiState.Loading -> {
-//                    Box(
-//                        modifier = Modifier.fillMaxSize(),
-//                        contentAlignment = Alignment.Center
-//                    ) {
-//                        CircularProgressIndicator()
-//                    }
-//                }
-//
-//                is EmployeesUiState.Error -> {
-//                    Box(
-//                        modifier = Modifier.fillMaxSize(),
-//                        contentAlignment = Alignment.Center
-//                    ) {
-//                        Text(currentState.message)
-//                    }
-//                }
-//
-//                is EmployeesUiState.Success -> {
-//
-//                    if (currentState.employees.isEmpty()) {
-//                        Box(
-//                            modifier = Modifier.fillMaxSize(),
-//                            contentAlignment = Alignment.Center
-//                        ) {
-//                            Text("No employees found")
-//                        }
-//                    } else {
-//
-//                        LazyColumn(
-//                            modifier = Modifier.fillMaxSize()
-//                        ) {
-//                            items(currentState.employees) { employee ->
-//                                EmployeeCard(
-//                                    employee = employee,
-//                                    onClick = {
-//                                        onEmployeeClick(employee.id)
-//                                    }
-//                                )
-//                            }
-//                        }
-//                    }
-//
-//                    // 🔽 FILTER SHEET
-//                    if (showFilterSheet) {
-//                        FilterBottomSheet(
-//                            departments = currentState.departments,
-//                            designations = currentState.designations,
-//                            currentFilter = filterState,
-//                            onDepartmentSelected = viewModel::updateDepartment,
-//                            onDesignationSelected = viewModel::updateDesignation,
-//                            onStatusSelected = viewModel::updateStatus,
-//                            onClearAll = viewModel::clearFilters,
-//                            onDismiss = { showFilterSheet = false }
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//
-//        // 🔄 Small loading overlay while refreshing
-//        if (isRefreshing) {
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxSize(),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                CircularProgressIndicator()
-//            }
-//        }
-//    }
-//}
-
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import com.example.teamhub2.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun EmployeesScreen(
+    themeViewModel: ThemeViewModel,
     viewModel: EmployeesViewModel = hiltViewModel(),
     onEmployeeClick: (String) -> Unit
 ) {
@@ -182,9 +35,11 @@ fun EmployeesScreen(
     val filterState by viewModel.filterState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
 
+    // Dark mode state
+    val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+
     var showFilterSheet by remember { mutableStateOf(false) }
 
-    // ✅ Pull Refresh State
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refreshEmployees() }
@@ -195,6 +50,20 @@ fun EmployeesScreen(
             TopAppBar(
                 title = { Text("Employees") },
                 actions = {
+
+                    // 🌙 Dark Mode Toggle
+                    IconButton(
+                        onClick = { themeViewModel.toggleTheme() }
+                    ) {
+                        Icon(
+                            imageVector =
+                                if (isDarkMode) Icons.Default.LightMode
+                                else Icons.Default.DarkMode,
+                            contentDescription = "Toggle Theme"
+                        )
+                    }
+
+                    // Filter Button
                     IconButton(onClick = { showFilterSheet = true }) {
                         Icon(
                             imageVector = Icons.Default.FilterList,
@@ -217,7 +86,7 @@ fun EmployeesScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
 
-                // 🔎 Search Field
+                // Search Field
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = viewModel::onSearchChange,
@@ -228,7 +97,7 @@ fun EmployeesScreen(
                     singleLine = true
                 )
 
-                // 📡 Offline Banner
+                // Offline Banner
                 if (isOffline) {
                     Surface(
                         color = MaterialTheme.colorScheme.errorContainer,
@@ -264,6 +133,14 @@ fun EmployeesScreen(
 
                     is EmployeesUiState.Success -> {
 
+                        Text(
+                            text = "Total Employees: ${currentState.totalCount}",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         if (currentState.employees.isEmpty()) {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
@@ -273,7 +150,11 @@ fun EmployeesScreen(
                             }
                         } else {
                             LazyColumn(
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                contentPadding = PaddingValues(bottom = 16.dp)
                             ) {
                                 items(
                                     items = currentState.employees,
@@ -305,7 +186,6 @@ fun EmployeesScreen(
                 }
             }
 
-            // 🔽 Pull Refresh Indicator
             PullRefreshIndicator(
                 refreshing = isRefreshing,
                 state = pullRefreshState,

@@ -7,10 +7,11 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.teamhub2.ui.employees.EmployeesScreen
 import com.example.teamhub2.ui.detail.EmployeeDetailScreen
-
+import com.example.teamhub2.viewmodel.ThemeViewModel
 
 @Composable
 fun AppNavGraph(
+    themeViewModel: ThemeViewModel,
     navController: NavHostController = rememberNavController()
 ) {
 
@@ -22,6 +23,7 @@ fun AppNavGraph(
         composable(Screen.Employees.route) {
 
             EmployeesScreen(
+                themeViewModel = themeViewModel,   // ✅ pass ThemeViewModel here
                 onEmployeeClick = { employeeId ->
                     navController.navigate(
                         Screen.Detail.createRoute(employeeId)

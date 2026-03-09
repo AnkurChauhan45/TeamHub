@@ -9,7 +9,8 @@ sealed class EmployeesUiState {
     data class Success(
         val employees: List<EmployeeEntity>,
         val departments: List<String>,
-        val designations: List<String>
+        val designations: List<String>,
+        val totalCount: Int
     ) : EmployeesUiState()
 
     data class Error(val message: String) : EmployeesUiState()

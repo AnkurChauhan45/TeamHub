@@ -53,4 +53,5 @@ class NetworkUtils @Inject constructor(
             connectivityManager.unregisterNetworkCallback(callback)
         }
     }
+
 }

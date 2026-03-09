@@ -44,11 +44,12 @@ class EmployeeRepositoryImpl @Inject constructor(
 
                 Log.d("API_DEBUG", "Employees size: ${employees.size}")
 
-                // Clear old data (optional but recommended)
+                // Clear old data
                 dao.clearEmployees()
 
                 val entityList = employees.map { it.toEntity() }
 
+                // Insert new data
                 dao.insertEmployees(entityList)
 
                 Log.d("API_DEBUG", "Inserted into Room successfully")
@@ -61,6 +62,7 @@ class EmployeeRepositoryImpl @Inject constructor(
             Log.e("API_DEBUG", "Exception: ${e.message}")
         }
     }
+
     override fun getEmployeeById(id: String): Flow<EmployeeEntity?> {
         return dao.getEmployeeById(id)
     }
