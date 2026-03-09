@@ -13,7 +13,7 @@ interface EmployeeDao {
     @Query("DELETE FROM employees")
     suspend fun clearEmployees()
 
-    @Query("SELECT * FROM employees")
+    @Query("SELECT * FROM employees ORDER BY name ASC")
     fun getEmployees(): Flow<List<EmployeeEntity>>
 
     @Query("SELECT * FROM employees WHERE id = :id")
