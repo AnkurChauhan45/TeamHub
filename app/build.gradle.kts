@@ -6,6 +6,7 @@ plugins {
 }
 
 android {
+
     namespace = "com.example.teamhub2"
     compileSdk = 34
 
@@ -37,20 +38,22 @@ android {
 
 dependencies {
 
-    // 🔥 Compose BOM (controls all compose versions)
+    // Compose BOM
     implementation(platform(libs.androidx.compose.bom))
 
-    // Core Android
+    // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 
-    // ✅ Compose (Material3 only)
+    // Compose
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.icons)
+    implementation(libs.androidx.compose.foundation)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 
@@ -72,10 +75,12 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.okhttp)
 
-    // Coil (Image loading)
+    // Coil
     implementation(libs.coil.compose)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
-    implementation("androidx.compose.material:material:1.6.0")
+
+    // Lifecycle Compose
+    implementation(libs.androidx.lifecycle.runtime.compose)
 }

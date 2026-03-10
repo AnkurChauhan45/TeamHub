@@ -20,6 +20,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import com.example.teamhub2.viewmodel.ThemeViewModel
+import androidx.compose.material.icons.filled.SearchOff
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -51,7 +52,7 @@ fun EmployeesScreen(
                 title = { Text("Employees") },
                 actions = {
 
-                    // 🌙 Dark Mode Toggle
+                    //  Dark Mode Toggle
                     IconButton(
                         onClick = { themeViewModel.toggleTheme() }
                     ) {
@@ -134,7 +135,7 @@ fun EmployeesScreen(
                     is EmployeesUiState.Success -> {
 
                         Text(
-                            text = "Total Employees: ${currentState.totalCount}",
+                            text = "Total: ${currentState.totalCount}",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
@@ -142,19 +143,12 @@ fun EmployeesScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         if (currentState.employees.isEmpty()) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("No employees found")
-                            }
+                            EmptyState()
+
                         } else {
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(horizontal = 8.dp),
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                                contentPadding = PaddingValues(bottom = 16.dp)
                             ) {
                                 items(
                                     items = currentState.employees,
@@ -192,5 +186,40 @@ fun EmployeesScreen(
                 modifier = Modifier.align(Alignment.TopCenter)
             )
         }
+    }
+}
+
+@Composable
+fun EmptyState() {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        Icon(
+            imageVector = Icons.Default.SearchOff,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "No employees found",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Try adjusting your search or filters",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

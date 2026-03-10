@@ -44,13 +44,13 @@ class EmployeeRepositoryImpl @Inject constructor(
 
                 Log.d("API_DEBUG", "Employees size: ${employees.size}")
 
-                // Clear old data
-                dao.clearEmployees()
 
                 val entityList = employees.map { it.toEntity() }
 
+                dao.replaceEmployees(entityList)
+
                 // Insert new data
-                dao.insertEmployees(entityList)
+                //dao.insertEmployees(entityList)
 
                 Log.d("API_DEBUG", "Inserted into Room successfully")
 

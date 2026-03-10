@@ -1,5 +1,7 @@
 package com.example.teamhub2.ui.detail
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Row
@@ -10,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -30,50 +33,66 @@ fun EmployeeDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Employee Details") },
+                title = { Text("Employee Profile") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
+                        Icon(Icons.Default.ArrowBack, contentDescription = null)
                     }
                 }
             )
         }
     ) { padding ->
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+        when (val state = uiState) {
 
-            when (val state = uiState) {
-
-                is EmployeeDetailUiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+            is EmployeeDetailUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
+            }
 
-                is EmployeeDetailUiState.Error -> {
-                    Text(
-                        text = state.message,
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.error
-                    )
+            is EmployeeDetailUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(state.message)
                 }
+            }
 
-                is EmployeeDetailUiState.Success -> {
+            is EmployeeDetailUiState.Success -> {
 
-                    val employee = state.employee
+                val employee = state.employee
 
-                    Column(
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                ) {
+
+                    // HEADER
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    listOf(
+                                        MaterialTheme.colorScheme.secondary,
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    )
+                                )
+                            )
+                    )
+
+                    // PROFILE IMAGE
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
 
                         AsyncImage(
@@ -81,67 +100,88 @@ fun EmployeeDetailScreen(
                             contentDescription = null,
                             modifier = Modifier
                                 .size(120.dp)
+                                .offset(y = (-60).dp)
                                 .clip(CircleShape)
+                                .border(
+                                    4.dp,
+                                    MaterialTheme.colorScheme.background,
+                                    CircleShape
+                                )
                         )
+                    }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                        Text(
-                            text = employee.name,
-                            style = MaterialTheme.typography.headlineSmall
+                    // NAME
+                    Text(
+                        text = employee.name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+
+                    Text(
+                        text = employee.designation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // STATUS CHIP
+                    AssistChip(
+                        onClick = {},
+                        label = {
+                            Text(if (employee.isActive) "Active" else "Inactive")
+                        },
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor =
+                                if (employee.isActive)
+                                    MaterialTheme.colorScheme.primaryContainer
+                                else
+                                    MaterialTheme.colorScheme.errorContainer
                         )
+                    )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                        Text(
-                            text = employee.designation,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                    // INFO CARD
+                    ElevatedCard(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        elevation = CardDefaults.elevatedCardElevation(6.dp)
+                    ) {
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Divider()
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        ElevatedCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            elevation = CardDefaults.elevatedCardElevation(4.dp)
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(18.dp)
                         ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp)
-                            ) {
 
-                                DetailRow(
-                                    icon = Icons.Default.CheckCircle,
-                                    value = if (employee.isActive) "Active" else "Inactive",
-                                    statusColor =
-                                        if (employee.isActive)
-                                            Color(0xFF2E7D32)
-                                        else
-                                            Color(0xFFC62828)
-                                )
+                            InfoRow(
+                                icon = Icons.Default.Business,
+                                label = "Department",
+                                value = employee.department
+                            )
 
-                                DetailRow(
-                                    icon = Icons.Default.Business,
-                                    value = employee.department
-                                )
+                            InfoRow(
+                                icon = Icons.Default.Email,
+                                label = "Email",
+                                value = employee.email
+                            )
 
-                                DetailRow(
-                                    icon = Icons.Default.Email,
-                                    value = employee.email
-                                )
+                            InfoRow(
+                                icon = Icons.Default.LocationOn,
+                                label = "Location",
+                                value = "${employee.city}, ${employee.country}"
+                            )
 
-                                DetailRow(
-                                    icon = Icons.Default.LocationOn,
-                                    value = "${employee.city}, ${employee.country}"
-                                )
-
-                                DetailRow(
-                                    icon = Icons.Default.CalendarMonth ,
-                                    value = employee.joiningDate
-                                )
-                            }
+                            InfoRow(
+                                icon = Icons.Default.CalendarMonth,
+                                label = "Joined",
+                                value = employee.joiningDate
+                            )
                         }
                     }
                 }
@@ -149,34 +189,38 @@ fun EmployeeDetailScreen(
         }
     }
 }
-
 @Composable
-private fun DetailRow(
+fun InfoRow(
     icon: ImageVector,
-    value: String,
-    statusColor: Color = MaterialTheme.colorScheme.onSurface
+    label: String,
+    value: String
 ) {
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         Icon(
-            imageVector = icon,
+            icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp)
+            tint = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            color = statusColor
-        )
+        Column {
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }
+

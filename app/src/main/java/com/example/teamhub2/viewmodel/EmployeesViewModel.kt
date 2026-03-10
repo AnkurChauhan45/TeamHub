@@ -18,9 +18,8 @@ class EmployeesViewModel @Inject constructor(
     private val networkUtils: NetworkUtils
 ) : ViewModel() {
 
+    // SEARCH
 
-
-    //  SEARCH
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -28,7 +27,11 @@ class EmployeesViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
-    //  FILTER
+    // Debounce search input
+    private val debouncedSearchQuery =
+        searchQuery.debounce(300)
+
+    // FILTER
 
     private val _filterState = MutableStateFlow(FilterState())
     val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
@@ -49,7 +52,8 @@ class EmployeesViewModel @Inject constructor(
         _filterState.value = FilterState()
     }
 
-    //  NETWORK STATE
+
+    // NETWORK STATE
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -57,30 +61,41 @@ class EmployeesViewModel @Inject constructor(
     private val _isOffline = MutableStateFlow(false)
     val isOffline: StateFlow<Boolean> = _isOffline.asStateFlow()
 
-    //  DATA SOURCE
+    // ---------------------------
+    // DATA SOURCE
+    // ---------------------------
 
-    private val rawEmployeesFlow: Flow<List<EmployeeEntity>> =
+    // Step 1 — Base employee flow
+    private val employeesFlow: Flow<List<EmployeeEntity>> =
         repository.getEmployees()
 
-    //  UI STATE
-    val uiState: StateFlow<EmployeesUiState> =
-        combine(
-            rawEmployeesFlow,
-            searchQuery,
-            filterState
-        ) { allEmployees, query, filter ->
-
-            val departments = allEmployees
+    // Step 2 — Departments flow
+    private val departmentsFlow =
+        employeesFlow.map { employees ->
+            employees
                 .map { it.department }
                 .distinct()
                 .sorted()
+        }
 
-            val designations = allEmployees
+    // Step 3 — Designations flow
+    private val designationsFlow =
+        employeesFlow.map { employees ->
+            employees
                 .map { it.designation }
                 .distinct()
                 .sorted()
+        }
 
-            val filteredEmployees = allEmployees
+    // Step 4 — Filter employees
+    private val filteredEmployeesFlow =
+        combine(
+            employeesFlow,
+            debouncedSearchQuery,
+            filterState
+        ) { employees, query, filter ->
+
+            employees
                 .filter {
                     it.name.contains(query.trim(), ignoreCase = true)
                 }
@@ -96,34 +111,23 @@ class EmployeesViewModel @Inject constructor(
                     filter.isActive == null ||
                             it.isActive == filter.isActive
                 }
-                .sortedWith { a, b ->
+                .sortedBy { it.name.lowercase() }
+        }
 
-                    val regex = Regex("""(\D+)\s*(\d+)?""")
+    // Step 5 — Final UI state
+    val uiState: StateFlow<EmployeesUiState> =
+        combine(
+            filteredEmployeesFlow,
+            departmentsFlow,
+            designationsFlow
+        ) { employees, departments, designations ->
 
-                    val aMatch = regex.find(a.name.lowercase())
-                    val bMatch = regex.find(b.name.lowercase())
-
-                    val aText = aMatch?.groupValues?.get(1) ?: ""
-                    val bText = bMatch?.groupValues?.get(1) ?: ""
-
-                    val textCompare = aText.compareTo(bText)
-
-                    if (textCompare != 0) {
-                        textCompare
-                    } else {
-                        val aNum = aMatch?.groupValues?.getOrNull(2)?.toIntOrNull() ?: 0
-                        val bNum = bMatch?.groupValues?.getOrNull(2)?.toIntOrNull() ?: 0
-                        aNum.compareTo(bNum)
-                    }
-                }
-            //  explicitly return EmployeesUiState
             EmployeesUiState.Success(
-                employees = filteredEmployees,
+                employees = employees,
                 departments = departments,
                 designations = designations,
-                totalCount = filteredEmployees.size
+                totalCount = employees.size
             ) as EmployeesUiState
-
         }
             .onStart { emit(EmployeesUiState.Loading) }
             .catch { emit(EmployeesUiState.Error("Something went wrong")) }
@@ -133,25 +137,33 @@ class EmployeesViewModel @Inject constructor(
                 EmployeesUiState.Loading
             )
 
-    //  INIT
+    // ---------------------------
+    // INIT
+    // ---------------------------
 
     init {
         observeNetwork()
         loadInitialEmployees()
     }
 
-    //  INITIAL LOAD
+    // ---------------------------
+    // INITIAL LOAD
+    // ---------------------------
 
+    private fun loadInitialEmployees() {
+        viewModelScope.launch {
 
-private fun loadInitialEmployees() {
-    viewModelScope.launch {
-        if (!_isOffline.value) {
-            repository.refreshEmployees()
+            if (!_isOffline.value) {
+                repository.refreshEmployees()
+            }
+
+            isInitialLoadDone = true
         }
     }
-}
 
-    //  PULL TO REFRESH
+    // ---------------------------
+    // PULL TO REFRESH
+    // ---------------------------
 
     fun refreshEmployees() {
         viewModelScope.launch {
@@ -168,39 +180,26 @@ private fun loadInitialEmployees() {
         }
     }
 
+    // ---------------------------
     // NETWORK OBSERVER
+    // ---------------------------
+
+    private var isInitialLoadDone = false
 
     private fun observeNetwork() {
         viewModelScope.launch {
 
             networkUtils.observeNetwork()
-                .drop(1) // ignore first emission
+                .drop(1)
                 .distinctUntilChanged()
                 .collect { isConnected ->
 
                     _isOffline.value = !isConnected
 
-                    if (isConnected) {
+                    if (isConnected && isInitialLoadDone) {
                         refreshEmployees()
                     }
                 }
         }
     }
-
-//    private fun observeNetwork() {
-//        viewModelScope.launch {
-//
-//            networkUtils.observeNetwork()
-//                .distinctUntilChanged()
-//                .collect { isConnected ->
-//
-//                    _isOffline.value = !isConnected
-//
-//                    // Internet available → auto refresh API
-//                    if (isConnected) {
-//                        refreshEmployees()
-//                    }
-//                }
-//        }
-//    }
 }

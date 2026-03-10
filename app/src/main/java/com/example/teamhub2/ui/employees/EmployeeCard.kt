@@ -1,5 +1,6 @@
 package com.example.teamhub2.ui.employees
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -10,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -24,15 +24,16 @@ fun EmployeeCard(
 
     ElevatedCard(
         onClick = onClick,
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(4.dp),
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 1.dp
         ),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         modifier = Modifier
-            .fillMaxWidth(1f)
+            .fillMaxWidth()
+            .padding(horizontal = 6.dp, vertical = 1.dp)
     ) {
 
         Row(
@@ -42,14 +43,14 @@ fun EmployeeCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            // 🔹 Profile Image with soft background ring
+            // Profile Image with soft background ring
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(60.dp)
                     .background(
                         brush = Brush.verticalGradient(
                             listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
                             )
                         ),
@@ -61,14 +62,14 @@ fun EmployeeCard(
                     model = employee.imgUrl,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(64.dp)
+                        .size(56.dp)
                         .clip(CircleShape)
                 )
             }
 
-            Spacer(modifier = Modifier.width(18.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-            // 🔹 Main Info Column
+            // Employee Info
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -79,7 +80,7 @@ fun EmployeeCard(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = employee.designation,
@@ -87,7 +88,7 @@ fun EmployeeCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
                     text = "${employee.city}, ${employee.country}",
@@ -96,13 +97,12 @@ fun EmployeeCard(
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
-            StatusChip(isActive = employee.isActive)
+            StatusChip(employee.isActive)
         }
     }
 }
-
 @Composable
 fun StatusChip(isActive: Boolean) {
 
@@ -122,7 +122,7 @@ fun StatusChip(isActive: Boolean) {
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(background)
-            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
             text = if (isActive) "Active" else "Inactive",
