@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -15,9 +16,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.teamhub2.ui.components.ProfileAvatar
+import com.example.teamhub2.ui.components.StatusChip
 import com.example.teamhub2.ui.state.EmployeeDetailUiState
 import com.example.teamhub2.viewmodel.EmployeeDetailViewModel
 
@@ -73,7 +77,7 @@ fun EmployeeDetailScreen(
                         .padding(padding)
                 ) {
 
-                    // HEADER
+                    // Header
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -88,76 +92,71 @@ fun EmployeeDetailScreen(
                             )
                     )
 
-                    // PROFILE IMAGE
+                    // Profile image
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-
-                        AsyncImage(
-                            model = employee.imgUrl,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(120.dp)
-                                .offset(y = (-60).dp)
-                                .clip(CircleShape)
-                                .border(
-                                    4.dp,
-                                    MaterialTheme.colorScheme.background,
-                                    CircleShape
-                                )
+                        ProfileAvatar(
+                            name = employee.name,
+                            imageUrl = employee.imgUrl,
+                            size = 120
                         )
+
+//                        AsyncImage(
+//                            model = employee.imgUrl,
+//                            contentDescription = null,
+//                            modifier = Modifier
+//                                .size(120.dp)
+//                                .offset(y = (-60).dp)
+//                                .clip(CircleShape)
+//                                .border(
+//                                    4.dp,
+//                                    MaterialTheme.colorScheme.background,
+//                                    CircleShape
+//                                )
+//                        )
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // NAME
+                    // Name
                     Text(
                         text = employee.name,
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
 
-                    Text(
-                        text = employee.designation,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // STATUS CHIP
-                    AssistChip(
-                        onClick = {},
-                        label = {
-                            Text(if (employee.isActive) "Active" else "Inactive")
-                        },
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor =
-                                if (employee.isActive)
-                                    MaterialTheme.colorScheme.primaryContainer
-                                else
-                                    MaterialTheme.colorScheme.errorContainer
-                        )
+                    // Status chip
+                    StatusChip(
+                        isActive = employee.isActive,
+                        small = true,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // INFO CARD
+                    // Info card
                     ElevatedCard(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .fillMaxWidth(),
-                        elevation = CardDefaults.elevatedCardElevation(6.dp)
+                        elevation = CardDefaults.elevatedCardElevation(2.dp)
                     ) {
 
                         Column(
                             modifier = Modifier.padding(20.dp),
                             verticalArrangement = Arrangement.spacedBy(18.dp)
                         ) {
+
+                            InfoRow(
+                                icon = Icons.Default.Engineering,
+                                label = "Designation",
+                                value = employee.designation
+                            )
 
                             InfoRow(
                                 icon = Icons.Default.Business,
@@ -210,11 +209,11 @@ fun InfoRow(
 
         Column {
 
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+//            Text(
+//                text = label,
+//                style = MaterialTheme.typography.labelMedium,
+//                color = MaterialTheme.colorScheme.onSurfaceVariant
+//            )
 
             Text(
                 text = value,

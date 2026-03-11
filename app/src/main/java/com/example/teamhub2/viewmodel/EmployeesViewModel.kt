@@ -18,7 +18,7 @@ class EmployeesViewModel @Inject constructor(
     private val networkUtils: NetworkUtils
 ) : ViewModel() {
 
-    // SEARCH
+    //SEARCH
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -27,11 +27,11 @@ class EmployeesViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
-    // Debounce search input
+    //Debounce search input
     private val debouncedSearchQuery =
         searchQuery.debounce(300)
 
-    // FILTER
+    //FILTER
 
     private val _filterState = MutableStateFlow(FilterState())
     val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
@@ -53,7 +53,7 @@ class EmployeesViewModel @Inject constructor(
     }
 
 
-    // NETWORK STATE
+    //NETWORK STATE
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -61,15 +61,12 @@ class EmployeesViewModel @Inject constructor(
     private val _isOffline = MutableStateFlow(false)
     val isOffline: StateFlow<Boolean> = _isOffline.asStateFlow()
 
-    // ---------------------------
-    // DATA SOURCE
-    // ---------------------------
-
-    // Step 1 — Base employee flow
+    //DATA SOURCE
+    //Base employee flow
     private val employeesFlow: Flow<List<EmployeeEntity>> =
         repository.getEmployees()
 
-    // Step 2 — Departments flow
+    //Departments flow
     private val departmentsFlow =
         employeesFlow.map { employees ->
             employees
@@ -78,7 +75,7 @@ class EmployeesViewModel @Inject constructor(
                 .sorted()
         }
 
-    // Step 3 — Designations flow
+    //Designations flow
     private val designationsFlow =
         employeesFlow.map { employees ->
             employees
@@ -87,7 +84,7 @@ class EmployeesViewModel @Inject constructor(
                 .sorted()
         }
 
-    // Step 4 — Filter employees
+    //Filter employees
     private val filteredEmployeesFlow =
         combine(
             employeesFlow,
@@ -114,7 +111,7 @@ class EmployeesViewModel @Inject constructor(
                 .sortedBy { it.name.lowercase() }
         }
 
-    // Step 5 — Final UI state
+    //Final UI state
     val uiState: StateFlow<EmployeesUiState> =
         combine(
             filteredEmployeesFlow,
@@ -136,20 +133,13 @@ class EmployeesViewModel @Inject constructor(
                 SharingStarted.WhileSubscribed(5000),
                 EmployeesUiState.Loading
             )
-
-    // ---------------------------
-    // INIT
-    // ---------------------------
-
+    //INIT
     init {
         observeNetwork()
         loadInitialEmployees()
     }
 
-    // ---------------------------
-    // INITIAL LOAD
-    // ---------------------------
-
+    //INITIAL Load
     private fun loadInitialEmployees() {
         viewModelScope.launch {
 
@@ -160,11 +150,7 @@ class EmployeesViewModel @Inject constructor(
             isInitialLoadDone = true
         }
     }
-
-    // ---------------------------
-    // PULL TO REFRESH
-    // ---------------------------
-
+    //Pull to refresh
     fun refreshEmployees() {
         viewModelScope.launch {
 
@@ -179,11 +165,7 @@ class EmployeesViewModel @Inject constructor(
             }
         }
     }
-
-    // ---------------------------
-    // NETWORK OBSERVER
-    // ---------------------------
-
+    //Network Observer
     private var isInitialLoadDone = false
 
     private fun observeNetwork() {

@@ -13,8 +13,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.teamhub2.data.local.entity.EmployeeEntity
+import com.example.teamhub2.ui.components.ProfileAvatar
+import com.example.teamhub2.ui.components.StatusChip
 
 @Composable
 fun EmployeeCard(
@@ -43,7 +44,7 @@ fun EmployeeCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            // Profile Image with soft background ring
+            //Profile Image with soft background ring
             Box(
                 modifier = Modifier
                     .size(60.dp)
@@ -58,18 +59,16 @@ fun EmployeeCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                AsyncImage(
-                    model = employee.imgUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
+                ProfileAvatar(
+                    name = employee.name,
+                    imageUrl = employee.imgUrl,
+                    size = 56
                 )
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Employee Info
+            //Employee Info
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -101,34 +100,5 @@ fun EmployeeCard(
 
             StatusChip(employee.isActive)
         }
-    }
-}
-@Composable
-fun StatusChip(isActive: Boolean) {
-
-    val background =
-        if (isActive)
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-        else
-            MaterialTheme.colorScheme.error.copy(alpha = 0.12f)
-
-    val content =
-        if (isActive)
-            MaterialTheme.colorScheme.primary
-        else
-            MaterialTheme.colorScheme.error
-
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(background)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Text(
-            text = if (isActive) "Active" else "Inactive",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Medium,
-            color = content
-        )
     }
 }

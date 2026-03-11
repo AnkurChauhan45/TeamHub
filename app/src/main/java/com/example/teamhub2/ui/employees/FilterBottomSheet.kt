@@ -88,7 +88,7 @@ fun FilterBottomSheet(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // ---------------- DESIGNATION ----------------
+            //DESIGNATION
 
             if (designations.isNotEmpty()) {
 
@@ -121,7 +121,7 @@ fun FilterBottomSheet(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // ---------------- STATUS ----------------
+            //STATUS
 
             Text(
                 text = "Status",
@@ -157,7 +157,7 @@ fun FilterBottomSheet(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // APPLY BUTTON
+            //APPLY BUTTON
             Button(
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()

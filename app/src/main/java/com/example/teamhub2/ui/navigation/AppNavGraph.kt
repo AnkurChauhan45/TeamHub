@@ -23,7 +23,7 @@ fun AppNavGraph(
         composable(Screen.Employees.route) {
 
             EmployeesScreen(
-                themeViewModel = themeViewModel,   // ✅ pass ThemeViewModel here
+                themeViewModel = themeViewModel,   //pass ThemeViewModel here
                 onEmployeeClick = { employeeId ->
                     navController.navigate(
                         Screen.Detail.createRoute(employeeId)

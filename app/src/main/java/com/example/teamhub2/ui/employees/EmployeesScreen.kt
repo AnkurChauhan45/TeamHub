@@ -36,7 +36,7 @@ fun EmployeesScreen(
     val filterState by viewModel.filterState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
 
-    // Dark mode state
+    //Dark mode state
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
 
     var showFilterSheet by remember { mutableStateOf(false) }
@@ -52,7 +52,7 @@ fun EmployeesScreen(
                 title = { Text("Employees") },
                 actions = {
 
-                    //  Dark Mode Toggle
+                    //Dark Mode Toggle
                     IconButton(
                         onClick = { themeViewModel.toggleTheme() }
                     ) {
@@ -64,7 +64,7 @@ fun EmployeesScreen(
                         )
                     }
 
-                    // Filter Button
+                    //Filter Button
                     IconButton(onClick = { showFilterSheet = true }) {
                         Icon(
                             imageVector = Icons.Default.FilterList,
@@ -87,7 +87,7 @@ fun EmployeesScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
 
-                // Search Field
+                //Search Field
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = viewModel::onSearchChange,
@@ -98,7 +98,7 @@ fun EmployeesScreen(
                     singleLine = true
                 )
 
-                // Offline Banner
+                //Offline Banner
                 if (isOffline) {
                     Surface(
                         color = MaterialTheme.colorScheme.errorContainer,
